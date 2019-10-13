@@ -1,0 +1,96 @@
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.3.1/css/bootstrap.min.css}"/>
+</head>
+<body>
+<div class="header-panel">
+    <div class="row">
+        <div class="col-md-12">
+            <h3> Matcher </h3>
+        </div>
+    </div>
+
+</div>
+<div class="container">
+        <form method="POST" enctype="multipart/form-data" action="/file/upload">
+        <div class="form-group row">
+            <label for="excelFile" class="col-sm-2 col-form-label form-control-sm">Excel file</label>
+            <div class="col-sm-10">
+            <input type="file" name="excelFile" id="excelFile" placeholder="Upload xlsx file..." class="form-control form-control-sm" required/>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="excelFile" class="col-sm-2 col-form-label form-control-sm">Tips/set</label>
+            <div class="col-sm-10">
+            <input type="number" min="2" id="k" name="k" class="form-control form-control-sm" required/>
+<!--            <input type="submit" value="Upload" />-->
+            </div>
+            <button type="submit" class="btn btn-primary mb-2">Upload</button>
+        </div>
+    </form>
+    <th:block th:if="${tipsters != null}">
+    <div class="row" >
+        <div class="col-md-12">
+            <h4> Original data set </h4>
+        </div>
+    </div>
+    <div class="row">
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th> Tipster</th>
+                <th:block th:each="day : ${days}">
+                <th th:text="${day}"></th>
+                 </th:block>
+            </tr>
+            </thead>
+            <tbody>
+                <tr th:each="tipster : ${tipsters}">
+                    <td th:text="${tipster.getName()}" />
+                    <th:block th:each="day : ${days}">
+                        <td th:text="${tipster.getResults().get(day)}" th:classappend="${tipster.getResults().get(day) ==1 } ? bg-success : bg-danger"></td>
+                    </th:block>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+    </th:block>
+
+    <th:block th:if="${resultsSorted != null}">
+    <div class="row" >
+        <div class="col-md-12">
+           <h4 > Result </h4>
+        </div>
+    </div>
+    <div class="row" th:each="result : ${resultsSorted}">
+        <h5 th:text="${result.key + 'wins / month'}"> </h5>
+
+        <th:block th:each="combination : ${result.value}">
+
+            <table  class="table table-bordered">
+                <thead>
+                <tr>
+                    <th> Tipster</th>
+                    <th:block th:each="day : ${days}">
+                        <th th:text="${day}"></th>
+                    </th:block>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="tipster : ${combination}">
+                    <td th:text="${tipster.getName()}" />
+                    <th:block th:each="day : ${days}">
+                        <td th:text="${tipster.getResults().get(day)}" th:classappend="${tipster.getResults().get(day) ==1 } ? bg-success : bg-danger"></td>
+                    </th:block>
+                </tr>
+
+                </tbody>
+            </table>
+        </th:block>
+    </div>
+    </th:block>
+</div>
+
+</body>
+</html>
