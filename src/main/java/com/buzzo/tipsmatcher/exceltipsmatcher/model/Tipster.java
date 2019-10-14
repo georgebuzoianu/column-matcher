@@ -12,4 +12,5 @@ import java.util.Map;
 public class Tipster {
     String name;
     Map<Integer, Integer> results;
+    Integer winsPerMonth;
 }
