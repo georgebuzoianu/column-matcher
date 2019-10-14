@@ -1,6 +1,7 @@
 <html xmlns:th="https://www.thymeleaf.org">
 <head>
     <link rel="stylesheet" th:href="@{/webjars/bootstrap/4.3.1/css/bootstrap.min.css}"/>
+    <link th:href="@{/css/main.css}" rel="stylesheet" media="screen" />
 </head>
 <body>
 <div class="header-panel">
@@ -66,7 +67,7 @@
     <th:block th:if="${resultsSorted != null && resultsSorted.size() > 0}">
     <div class="row" >
         <div class="col-md-12">
-           <h4 th:text="'Results: ' + ${noOfFoundCombinations} + ' combinations found'"> </h4>
+           <h4 th:text="'Results: ' + ${noOfFoundCombinations} + ' relevant combinations found'"> </h4>
         </div>
     </div>
     <div class="row" th:each="result : ${resultsSorted}">
