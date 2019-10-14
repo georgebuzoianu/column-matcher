@@ -43,7 +43,6 @@ public class FileUploadController {
         List<Tipster> tipstersList = getTipstersFromFile(file);
         redirectAttributes.addFlashAttribute("tipsters" , tipstersList);
 
-        logger.info("Tipsters found: {}", tipstersList.size());
         final Integer k = initK > tipstersList.size() ? tipstersList.size() : initK;
 
         List<int[]> combinations = Combinatorics.combinations(tipstersList.size(), k).toList();
@@ -77,7 +76,11 @@ public class FileUploadController {
                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                                                                 (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
-        logger.info("Result map size: " + resultsSorted.size());
+        resultsSorted.entrySet().stream().forEach( r -> {
+            logger.info("Results: {} wins/month -> {} combinations ", r.getKey(), r.getValue().size());
+            }
+        );
+
         int noOfFoundCombinations =  resultsSorted.values().stream().mapToInt(list -> list.size()).sum();
 
         redirectAttributes.addFlashAttribute("noOfFoundCombinations" , noOfFoundCombinations);
@@ -106,17 +109,33 @@ public class FileUploadController {
                     .name(tipsterName)
                     .results(new HashMap())
                     .build();
-//            logger.info("Reading days for: {}", tipster.getName());
+            int winsPerMonth = 0;
             for (int day = 1; day <= 31; day++) {
 
-                int result = 0;
+                int resultOfDay = 0;
                 if(row.getCell(day) !=null && row.getCell(day).getCellType()== CellType.NUMERIC)
-                    result = (int)row.getCell(day).getNumericCellValue();
+                    resultOfDay = (int)row.getCell(day).getNumericCellValue();
 
-                tipster.getResults().put(day, result);
+                tipster.getResults().put(day, resultOfDay);
+                winsPerMonth += resultOfDay;
             }
+            tipster.setWinsPerMonth(winsPerMonth);
             tipstersList.add(tipster);
         }
+
+        tipstersList.sort(new Comparator<Tipster>() {
+            @Override
+            public int compare(Tipster o1, Tipster o2) {
+                return o1.getWinsPerMonth() > o2.getWinsPerMonth() ? -1 : 1;
+            }
+        });
+        logger.info("Tipsters found: {}", tipstersList.size());
+
+        if(tipstersList.size() > 22) {
+            tipstersList = tipstersList.subList(0, 22);
+            logger.info("Keep only the first 22 tipsters");
+        }
+
         return tipstersList;
     }
 }
