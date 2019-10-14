@@ -47,7 +47,7 @@ public class FileUploadController {
 
         List<int[]> combinations = Combinatorics.combinations(tipstersList.size(), k).toList();
 
-        logger.info("Total no of combinations of {} in sets of {}: {}", tipstersList.size(), k, combinations.size());
+        logger.info("Total no of possible combinations of {} in sets of {}: {}", tipstersList.size(), k, combinations.size());
 
         List<List<Tipster>> allCombinations = combinations.stream().map(combination ->
         {
@@ -71,7 +71,7 @@ public class FileUploadController {
         .filter(pair -> pair.getLeft() > 1)
         .collect(groupingBy(Pair::getLeft, Collectors.mapping(Pair::getRight, Collectors.toList())));
 
-        Map<Integer, List<List<Tipster>>> resultsSorted = results.entrySet().stream()
+        LinkedHashMap<Integer, List<List<Tipster>>> resultsSorted = results.entrySet().stream()
                                                         .sorted(Map.Entry.comparingByKey(Comparator.reverseOrder()))
                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                                                                 (oldValue, newValue) -> oldValue, LinkedHashMap::new));
@@ -80,6 +80,21 @@ public class FileUploadController {
             logger.info("Results: {} wins/month -> {} combinations ", r.getKey(), r.getValue().size());
             }
         );
+
+        Integer lastKey = resultsSorted.keySet().stream().reduce((first, second) -> second)
+                .orElse(null);
+
+
+
+        if (resultsSorted.entrySet().size() > 2) {
+            logger.info("Remove combinations for {} wins/month. They are too many", lastKey);
+            resultsSorted.remove(lastKey);
+            resultsSorted.entrySet().stream().forEach( r -> {
+                        logger.info("FINAL RESULTS: {} wins/month -> {} combinations ", r.getKey(), r.getValue().size());
+                    }
+            );
+        }
+
 
         int noOfFoundCombinations =  resultsSorted.values().stream().mapToInt(list -> list.size()).sum();
 
