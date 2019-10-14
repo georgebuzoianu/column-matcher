@@ -41,10 +41,11 @@
             <table class="table table-bordered">
                 <thead>
                 <tr>
-                    <th> Tipster</th>
+                    <th>Tipster</th>
                     <th:block th:each="day : ${days}">
-                    <th th:text="${day}"></th>
-                     </th:block>
+                        <th th:text="${day}"></th>
+                    </th:block>
+                    <th> Wins/month</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -53,6 +54,7 @@
                         <th:block th:each="day : ${days}">
                             <td th:text="${tipster.getResults().get(day)}" th:classappend="${tipster.getResults().get(day) ==1 } ? bg-success : bg-danger"></td>
                         </th:block>
+                        <td th:text="${tipster.getWinsPerMonth()}" />
                     </tr>
 
                 </tbody>
@@ -64,12 +66,12 @@
     <th:block th:if="${resultsSorted != null && resultsSorted.size() > 0}">
     <div class="row" >
         <div class="col-md-12">
-           <h4 th:text="'Results: ' + ${noOfFoundCombinations} + 'combinations found'"> </h4>
+           <h4 th:text="'Results: ' + ${noOfFoundCombinations} + ' combinations found'"> </h4>
         </div>
     </div>
     <div class="row" th:each="result : ${resultsSorted}">
         <div class="col-md-12">
-            <h5 th:text="${result.key + 'wins / month'}"> </h5>
+            <h5 th:text="${result.key} + 'wins / month - ' + ${result.value.size()} + ' combinations'"> </h5>
 
             <th:block th:each="combination : ${result.value}">
 
