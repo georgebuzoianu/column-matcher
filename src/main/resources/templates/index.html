@@ -61,7 +61,7 @@
                 </thead>
                 <tbody>
                     <tr th:each="tipster,tipsterStat : ${tipsters}">
-                        <td th:text="${tipsterStat.index}" />
+                        <td th:text="${tipsterStat.index+1}" />
                         <td th:text="${tipster.getName()}" />
                         <th:block th:each="day : ${days}">
                             <td th:text="${tipster.getResults().get(day)}" th:classappend="${tipster.getResults().get(day) ==1 } ? bg-success : bg-danger"></td>
