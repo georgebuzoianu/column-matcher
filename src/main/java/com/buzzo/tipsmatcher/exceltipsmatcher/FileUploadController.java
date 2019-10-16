@@ -2,6 +2,7 @@ package com.buzzo.tipsmatcher.exceltipsmatcher;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import cc.redberry.combinatorics.Combinatorics;
@@ -36,11 +37,12 @@ public class FileUploadController {
     @PostMapping("/upload")
     public String handleFileUpload(@RequestParam("excelFile") MultipartFile file,
                                    @RequestParam("k") final Integer initK,
+                                   @RequestParam("sortType") final String sortType,
                                    RedirectAttributes redirectAttributes) throws IOException {
 
 //        redirectAttributes.addFlashAttribute("message", "You successfully uploaded " + file.getOriginalFilename() + "!");
 
-        List<Tipster> tipstersList = getTipstersFromFile(file);
+        List<Tipster> tipstersList = getTipstersFromFile(file, sortType);
         redirectAttributes.addFlashAttribute("tipsters" , tipstersList);
 
         final Integer k = initK > tipstersList.size() ? tipstersList.size() : initK;
@@ -103,7 +105,7 @@ public class FileUploadController {
         return "redirect:/";
     }
 
-    private List<Tipster> getTipstersFromFile(@RequestParam("excelFile") MultipartFile file) throws IOException {
+    private List<Tipster> getTipstersFromFile(MultipartFile file, String sortType) throws IOException {
         List<Tipster> tipstersList = new ArrayList<Tipster>();
         XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
         XSSFSheet worksheet = workbook.getSheetAt(0);
@@ -140,13 +142,12 @@ public class FileUploadController {
             tipstersList.add(tipster);
         }
 
-        tipstersList.sort(new Comparator<Tipster>() {
-            @Override
-            public int compare(Tipster o1, Tipster o2) {
-                return o1.getTotalWins() > o2.getTotalWins() ? -1 : 1;
-            }
-        });
-        logger.info("Tipsters found: {}", tipstersList.size());
+        logger.info("Tipsters found: {} and sort type: {}", tipstersList.size(), sortType);
+
+        Comparator comparator = "month".equals(sortType) ?
+                                        Comparator.comparing(Tipster::getWinsPerMonth).reversed()
+                                      : Comparator.comparing(Tipster::getTotalWins).reversed();
+        tipstersList.sort(comparator);
 
         if(tipstersList.size() > 22) {
             tipstersList = tipstersList.subList(0, 22);
