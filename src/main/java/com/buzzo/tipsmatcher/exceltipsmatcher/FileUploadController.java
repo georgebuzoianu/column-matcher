@@ -149,8 +149,8 @@ public class FileUploadController {
                                       : Comparator.comparing(Tipster::getTotalWins).reversed();
         tipstersList.sort(comparator);
 
-        if(tipstersList.size() > 22) {
-            tipstersList = tipstersList.subList(0, 22);
+        if(tipstersList.size() > 23) {
+            tipstersList = tipstersList.subList(0, 23);
             logger.info("Keep only the first 22 tipsters");
         }
 
