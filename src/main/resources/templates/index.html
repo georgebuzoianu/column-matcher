@@ -47,6 +47,8 @@
                         <th th:text="${day}"></th>
                     </th:block>
                     <th> Wins/month</th>
+                    <th> Previous Wins</th>
+                    <th> Total Wins</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -56,6 +58,8 @@
                             <td th:text="${tipster.getResults().get(day)}" th:classappend="${tipster.getResults().get(day) ==1 } ? bg-success : bg-danger"></td>
                         </th:block>
                         <td th:text="${tipster.getWinsPerMonth()}" />
+                        <td th:text="${tipster.getPreviousWins()}" />
+                        <td th:text="${tipster.getTotalWins()}" />
                     </tr>
 
                 </tbody>

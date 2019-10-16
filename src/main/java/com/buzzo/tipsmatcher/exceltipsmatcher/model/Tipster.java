@@ -13,4 +13,6 @@ public class Tipster {
     String name;
     Map<Integer, Integer> results;
     Integer winsPerMonth;
+    Integer previousWins;
+    Integer totalWins;
 }

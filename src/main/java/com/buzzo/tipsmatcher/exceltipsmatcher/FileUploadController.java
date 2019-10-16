@@ -115,7 +115,7 @@ public class FileUploadController {
 
             XSSFCell tipsterNameCell = row.getCell(0);
 
-            if(tipsterNameCell == null)
+            if(tipsterNameCell == null || tipsterNameCell.getCellType() != CellType.STRING)
                 continue;
 
             String tipsterName = tipsterNameCell.getStringCellValue();
@@ -135,13 +135,15 @@ public class FileUploadController {
                 winsPerMonth += resultOfDay;
             }
             tipster.setWinsPerMonth(winsPerMonth);
+            tipster.setPreviousWins((int)row.getCell(33).getNumericCellValue());
+            tipster.setTotalWins(tipster.getWinsPerMonth() + tipster.getPreviousWins());
             tipstersList.add(tipster);
         }
 
         tipstersList.sort(new Comparator<Tipster>() {
             @Override
             public int compare(Tipster o1, Tipster o2) {
-                return o1.getWinsPerMonth() > o2.getWinsPerMonth() ? -1 : 1;
+                return o1.getTotalWins() > o2.getTotalWins() ? -1 : 1;
             }
         });
         logger.info("Tipsters found: {}", tipstersList.size());
