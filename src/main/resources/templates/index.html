@@ -15,19 +15,26 @@
 <div class="container-fluid">
         <form method="POST" enctype="multipart/form-data" action="/file/upload">
         <div class="form-group row">
-            <label for="excelFile" class="col-sm-2 col-form-label form-control-sm">Excel file</label>
-            <div class="col-sm-6">
+            <label for="excelFile" class="col-sm-1 col-form-label form-control-sm">Excel file</label>
+            <div class="col-sm-5">
             <input type="file" name="excelFile" id="excelFile" placeholder="Upload xlsx file..." class="form-control form-control-sm" required/>
             </div>
         </div>
         <div class="form-group row">
-            <label for="excelFile" class="col-sm-2 col-form-label form-control-sm">Tips/set</label>
-            <div class="col-sm-6">
+            <label for="excelFile" class="col-sm-1 col-form-label form-control-sm">Tips/set</label>
+            <div class="col-sm-1">
             <input type="number" min="2" id="k" name="k" class="form-control form-control-sm" required/>
-<!--            <input type="submit" value="Upload" />-->
             </div>
-            <div class="col-sm-4">
-                <button type="submit" class="btn btn-primary btn-sm mb-2">Upload</button>
+            <div class="col-sm-3" >
+                <label class="form-control-sm">Sort by:</label>
+                <input type="radio" name="sortType" id="sortTypeGlobalOption" value="global" checked/>
+                <label class="form-control-sm form-check-label" for="sortTypeGlobalOption">global wins</label>
+
+                <input  type="radio" name="sortType" id="sortTypeMonthOption" value="month" />
+                <label class="form-control-sm form-check-label" for="sortTypeMonthOption">month wins</label>
+            </div>
+            <div class="col-sm-1">
+                <button type="submit" class="btn btn-primary btn-sm mb-2 float-right">Upload</button>
             </div>
         </div>
     </form>
@@ -42,6 +49,7 @@
             <table class="table table-bordered">
                 <thead>
                 <tr>
+                    <th>No.</th>
                     <th>Tipster</th>
                     <th:block th:each="day : ${days}">
                         <th th:text="${day}"></th>
@@ -52,7 +60,8 @@
                 </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="tipster : ${tipsters}">
+                    <tr th:each="tipster,tipsterStat : ${tipsters}">
+                        <td th:text="${tipsterStat.index}" />
                         <td th:text="${tipster.getName()}" />
                         <th:block th:each="day : ${days}">
                             <td th:text="${tipster.getResults().get(day)}" th:classappend="${tipster.getResults().get(day) ==1 } ? bg-success : bg-danger"></td>
@@ -103,6 +112,11 @@
         </div>
     </div>
     </th:block>
+    <div class="row" th:if="${resultsSorted != null && resultsSorted.size() == 0}">
+        <div class="col-md-12">
+            <h4 th:text="'Results: 0 relevant combinations found :('"> </h4>
+        </div>
+    </div>
 </div>
 
 </body>
