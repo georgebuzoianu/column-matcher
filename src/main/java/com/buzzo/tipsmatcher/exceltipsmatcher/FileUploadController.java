@@ -51,16 +51,15 @@ public class FileUploadController {
 
         logger.info("Total no of possible combinations of {} in sets of {}: {}", tipstersList.size(), k, combinations.size());
 
-        List<List<Tipster>> allCombinations = combinations.stream().map(combination ->
+        Map<Integer, List<List<Tipster>>> results = combinations.stream().map(combination ->
         {
             List<Tipster> tipstersCombination = new ArrayList<>();
             for(int i=0; i < combination.length; i++)
                 tipstersCombination.add(tipstersList.get(combination[i]));
 
             return tipstersCombination;
-        }).collect(toList());
-
-        Map<Integer, List<List<Tipster>>> results = allCombinations.stream().map(tipstersCombination -> {
+        })
+        .map(tipstersCombination -> {
             int noOfSuccesses = 0;
             for (int i = 1; i <= 31; i++) {
                 final int day = i;
@@ -77,6 +76,8 @@ public class FileUploadController {
                                                         .sorted(Map.Entry.comparingByKey(Comparator.reverseOrder()))
                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                                                                 (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
+        logger.info("DONE!");
 
         resultsSorted.entrySet().stream().forEach( r -> {
             logger.info("Results: {} wins/month -> {} combinations ", r.getKey(), r.getValue().size());
@@ -151,7 +152,7 @@ public class FileUploadController {
 
         if(tipstersList.size() > 23) {
             tipstersList = tipstersList.subList(0, 23);
-            logger.info("Keep only the first 22 tipsters");
+            logger.info("Keep only the first 23 tipsters");
         }
 
         return tipstersList;
