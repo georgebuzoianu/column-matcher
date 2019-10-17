@@ -113,8 +113,10 @@ public class FileUploadController {
 
         for (int rowNum = 1; rowNum < worksheet.getPhysicalNumberOfRows(); rowNum++) {
 
-
             XSSFRow row = worksheet.getRow(rowNum);
+
+            if(row == null)
+                continue;
 
             XSSFCell tipsterNameCell = row.getCell(0);
 
