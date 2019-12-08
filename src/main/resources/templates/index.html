@@ -64,7 +64,10 @@
                         <td th:text="${tipsterStat.index+1}" />
                         <td th:text="${tipster.getName()}" />
                         <th:block th:each="day : ${days}">
-                            <td th:text="${tipster.getResults().get(day)}" th:classappend="${tipster.getResults().get(day) ==1 } ? bg-success : bg-danger"></td>
+                            <td th:text="${tipster.getResults().get(day)}"
+                                th:classappend="|${tipster.getResults().get(day).equals('1') ? 'bg-success' : ''}
+                                                 ${tipster.getResults().get(day).equals('N') ? 'bg-light-success' : ''}
+                                                 ${tipster.getResults().get(day).equals('0') ? 'bg-danger' : ''}|"></td>
                         </th:block>
                         <td th:text="${tipster.getWinsPerMonth()}" />
                         <td th:text="${tipster.getPreviousWins()}" />
@@ -102,7 +105,10 @@
                     <tr th:each="tipster : ${combination}">
                         <td th:text="${tipster.getName()}" />
                         <th:block th:each="day : ${days}">
-                            <td th:text="${tipster.getResults().get(day)}" th:classappend="${tipster.getResults().get(day) ==1 } ? bg-success : bg-danger"></td>
+                            <td th:text="${tipster.getResults().get(day)}"
+                                th:classappend="|${tipster.getResults().get(day).equals('1') ? 'bg-success' : ''}
+                                                 ${tipster.getResults().get(day).equals('N') ? 'bg-light-success' : ''}
+                                                 ${tipster.getResults().get(day).equals('0') ? 'bg-danger' : ''}|"></td>
                         </th:block>
                     </tr>
 

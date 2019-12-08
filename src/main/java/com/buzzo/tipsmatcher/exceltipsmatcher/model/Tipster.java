@@ -11,7 +11,7 @@ import java.util.Map;
 @Builder
 public class Tipster {
     String name;
-    Map<Integer, Integer> results;
+    Map<Integer, String> results;
     Integer winsPerMonth;
     Integer previousWins;
     Integer totalWins;

@@ -63,7 +63,17 @@ public class FileUploadController {
             int noOfSuccesses = 0;
             for (int i = 1; i <= 31; i++) {
                 final int day = i;
-                int sum = tipstersCombination.stream().map(tipster -> tipster.getResults().get(day)).reduce(0, (a, b) -> a + b);
+                String sumString = tipstersCombination.stream().map(tipster -> tipster.getResults().get(day)).reduce("0", (a, b) -> {
+                    int acc = Integer.parseInt(a);
+                    int valueToAdd = 0;
+                    if(b.equals("N"))
+                        valueToAdd = 1;
+                    else
+                        valueToAdd = Integer.parseInt(b);
+                    acc = acc + valueToAdd;
+                    return String.valueOf(acc);
+                } );
+                int sum = Integer.parseInt(sumString);
                 if(sum == k )
                     noOfSuccesses ++;
             }
@@ -132,12 +142,22 @@ public class FileUploadController {
             int winsPerMonth = 0;
             for (int day = 1; day <= 31; day++) {
 
-                int resultOfDay = 0;
-                if(row.getCell(day) !=null && row.getCell(day).getCellType()== CellType.NUMERIC)
-                    resultOfDay = (int)row.getCell(day).getNumericCellValue();
+                int intResultOfDay = 0;
+                String resultOfDay = "0";
+                if(row.getCell(day) !=null && row.getCell(day).getCellType()== CellType.NUMERIC) {
+                    intResultOfDay = (int)row.getCell(day).getNumericCellValue();
+                    resultOfDay = String.valueOf(intResultOfDay);
+                }
+
+                if(row.getCell(day) !=null && row.getCell(day).getCellType()== CellType.STRING && row.getCell(day).getStringCellValue().equals("N")) {
+                    //if tip is missing for the day I want to count ZERO
+                    intResultOfDay = 0;
+                    resultOfDay = "N";
+                }
+
 
                 tipster.getResults().put(day, resultOfDay);
-                winsPerMonth += resultOfDay;
+                winsPerMonth += intResultOfDay;
             }
             tipster.setWinsPerMonth(winsPerMonth);
             tipster.setPreviousWins((int)row.getCell(33).getNumericCellValue());
