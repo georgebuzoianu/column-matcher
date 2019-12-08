@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import cc.redberry.combinatorics.Combinatorics;
 import com.buzzo.tipsmatcher.exceltipsmatcher.model.Tipster;
+import com.buzzo.tipsmatcher.exceltipsmatcher.model.TipstersCombination;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -51,7 +52,7 @@ public class FileUploadController {
 
         logger.info("Total no of possible combinations of {} in sets of {}: {}", tipstersList.size(), k, combinations.size());
 
-        Map<Integer, List<List<Tipster>>> results = combinations.stream().map(combination ->
+        Map<Integer, List<TipstersCombination>> results = combinations.stream().map(combination ->
         {
             List<Tipster> tipstersCombination = new ArrayList<>();
             for(int i=0; i < combination.length; i++)
@@ -61,6 +62,7 @@ public class FileUploadController {
         })
         .map(tipstersCombination -> {
             int noOfSuccesses = 0;
+            Map<Integer, Integer> winDays = new HashMap<>();
             for (int i = 1; i <= 31; i++) {
                 final int day = i;
                 String sumString = tipstersCombination.stream().map(tipster -> tipster.getResults().get(day)).reduce("0", (a, b) -> {
@@ -74,15 +76,18 @@ public class FileUploadController {
                     return String.valueOf(acc);
                 } );
                 int sum = Integer.parseInt(sumString);
-                if(sum == k )
+                if(sum == k ) {
                     noOfSuccesses ++;
+                    winDays.put(day, 1);
+                }
+
             }
-            return Pair.of(noOfSuccesses, tipstersCombination);
+            return Pair.of(noOfSuccesses, TipstersCombination.builder().tipsters(tipstersCombination).winDays(winDays).build());
         })
         .filter(pair -> pair.getLeft() > 1)
         .collect(groupingBy(Pair::getLeft, Collectors.mapping(Pair::getRight, Collectors.toList())));
 
-        LinkedHashMap<Integer, List<List<Tipster>>> resultsSorted = results.entrySet().stream()
+        LinkedHashMap<Integer, List<TipstersCombination>> resultsSorted = results.entrySet().stream()
                                                         .sorted(Map.Entry.comparingByKey(Comparator.reverseOrder()))
                                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                                                                 (oldValue, newValue) -> oldValue, LinkedHashMap::new));

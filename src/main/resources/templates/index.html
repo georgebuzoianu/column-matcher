@@ -97,18 +97,19 @@
                     <tr>
                         <th> Tipster</th>
                         <th:block th:each="day : ${days}">
-                            <th th:text="${day}"></th>
+                            <th th:text="${day}" th:classappend="${combination.getWinDays().get(day) == 1 ? 'th-win-day' : ''}"></th>
                         </th:block>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="tipster : ${combination}">
+                    <tr th:each="tipster : ${combination.getTipsters()}">
                         <td th:text="${tipster.getName()}" />
                         <th:block th:each="day : ${days}">
                             <td th:text="${tipster.getResults().get(day)}"
                                 th:classappend="|${tipster.getResults().get(day).equals('1') ? 'bg-success' : ''}
                                                  ${tipster.getResults().get(day).equals('N') ? 'bg-light-success' : ''}
-                                                 ${tipster.getResults().get(day).equals('0') ? 'bg-danger' : ''}|"></td>
+                                                 ${tipster.getResults().get(day).equals('0') ? 'bg-danger' : ''}
+                                                 ${combination.getWinDays().get(day) == 1 ? 'td-win-day' : ''}|"></td>
                         </th:block>
                     </tr>
 

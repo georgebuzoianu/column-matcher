@@ -5,3 +5,20 @@
  .bg-light-success {
      background-color: lightgreen;
  }
+
+.table-bordered th.th-win-day{
+      border-top: 3px solid blue;
+      border-left: 3px solid blue;
+      border-right: 3px solid blue;
+  }
+
+ .table-bordered td.td-win-day{
+     border-left: 3px solid blue;
+     border-right: 3px solid blue;
+ }
+
+ .table-bordered tr:last-child > td.td-win-day {
+     border-bottom: 3px solid blue;
+     border-left: 3px solid blue;
+     border-right: 3px solid blue; }
+
