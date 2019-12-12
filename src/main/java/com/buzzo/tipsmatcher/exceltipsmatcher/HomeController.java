@@ -15,11 +15,6 @@ public class HomeController {
 @GetMapping("/")
     public String redirect(Model model)
     {
-        List<Integer> days = new ArrayList<>();
-        for(int i = 1; i <= 31; i++){
-            days.add(i);
-        }
-        model.addAttribute("days", days);
         return "index";
     }
 }

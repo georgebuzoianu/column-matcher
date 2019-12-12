@@ -16,8 +16,17 @@
         <form method="POST" enctype="multipart/form-data" action="/file/upload">
         <div class="form-group row">
             <label for="excelFile" class="col-sm-1 col-form-label form-control-sm">Excel file</label>
-            <div class="col-sm-5">
+            <div class="col-sm-3">
             <input type="file" name="excelFile" id="excelFile" placeholder="Upload xlsx file..." class="form-control form-control-sm" required/>
+            </div>
+            <div class="col-sm-2" >
+                <label class="form-control-sm">Days:</label>
+                <input type="radio" name="noOfDaysAnalyzed" id="noOfDays31" value="31" checked/>
+                <label class="form-control-sm form-check-label" for="noOfDays31">31</label>
+                <input  type="radio" name="noOfDaysAnalyzed" id="noOfDaysAnalyzed62" value="62" />
+                <label class="form-control-sm form-check-label" for="noOfDaysAnalyzed62">62</label>
+                <input  type="radio" name="noOfDaysAnalyzed" id="noOfDaysAnalyzed93" value="93" />
+                <label class="form-control-sm form-check-label" for="noOfDaysAnalyzed93">93</label>
             </div>
         </div>
         <div class="form-group row">
@@ -88,7 +97,7 @@
     </div>
     <div class="row" th:each="result : ${resultsSorted}">
         <div class="col-md-12">
-            <h5 th:text="${result.key} + 'wins / month - ' + ${result.value.size()} + ' combinations'"> </h5>
+            <h5 th:text="${result.key} + 'wins / '+ ${days.size()} +' days - ' + ${result.value.size()} + ' combinations'"> </h5>
 
             <th:block th:each="combination : ${result.value}">
 

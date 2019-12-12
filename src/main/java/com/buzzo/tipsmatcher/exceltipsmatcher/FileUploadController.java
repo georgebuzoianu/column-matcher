@@ -38,13 +38,13 @@ public class FileUploadController {
     @PostMapping("/upload")
     public String handleFileUpload(@RequestParam("excelFile") MultipartFile file,
                                    @RequestParam("k") final Integer initK,
+                                   @RequestParam("noOfDaysAnalyzed") final Integer NO_OF_DAYS_ANALYZED,
                                    @RequestParam("sortType") final String sortType,
                                    RedirectAttributes redirectAttributes) throws IOException {
 
 //        redirectAttributes.addFlashAttribute("message", "You successfully uploaded " + file.getOriginalFilename() + "!");
-
-        List<Tipster> tipstersList = getTipstersFromFile(file, sortType);
-        redirectAttributes.addFlashAttribute("tipsters" , tipstersList);
+        List<Tipster> tipstersList = getTipstersFromFile(file, sortType, NO_OF_DAYS_ANALYZED);
+        redirectAttributes.addFlashAttribute("tipsters", tipstersList);
 
         final Integer k = initK > tipstersList.size() ? tipstersList.size() : initK;
 
@@ -55,73 +55,73 @@ public class FileUploadController {
         Map<Integer, List<TipstersCombination>> results = combinations.stream().map(combination ->
         {
             List<Tipster> tipstersCombination = new ArrayList<>();
-            for(int i=0; i < combination.length; i++)
+            for (int i = 0; i < combination.length; i++)
                 tipstersCombination.add(tipstersList.get(combination[i]));
 
             return tipstersCombination;
         })
-        .map(tipstersCombination -> {
-            int noOfSuccesses = 0;
-            Map<Integer, Integer> winDays = new HashMap<>();
-            for (int i = 1; i <= 31; i++) {
-                final int day = i;
-                String sumString = tipstersCombination.stream().map(tipster -> tipster.getResults().get(day)).reduce("0", (a, b) -> {
-                    int acc = Integer.parseInt(a);
-                    int valueToAdd = 0;
-                    if(b.equals("N"))
-                        valueToAdd = 1;
-                    else
-                        valueToAdd = Integer.parseInt(b);
-                    acc = acc + valueToAdd;
-                    return String.valueOf(acc);
-                } );
-                int sum = Integer.parseInt(sumString);
-                if(sum == k ) {
-                    noOfSuccesses ++;
-                    winDays.put(day, 1);
-                }
+                .map(tipstersCombination -> {
+                    int noOfSuccesses = 0;
+                    Map<Integer, Integer> winDays = new HashMap<>();
+                    for (int i = 1; i <= NO_OF_DAYS_ANALYZED; i++) {
+                        final int day = i;
+                        String sumString = tipstersCombination.stream().map(tipster -> tipster.getResults().get(day)).reduce("0", (a, b) -> {
+                            int acc = Integer.parseInt(a);
+                            int valueToAdd = 0;
+                            if (b.equals("N"))
+                                valueToAdd = 1;
+                            else
+                                valueToAdd = Integer.parseInt(b);
+                            acc = acc + valueToAdd;
+                            return String.valueOf(acc);
+                        });
+                        int sum = Integer.parseInt(sumString);
+                        if (sum == k) {
+                            noOfSuccesses++;
+                            winDays.put(day, 1);
+                        }
 
-            }
-            return Pair.of(noOfSuccesses, TipstersCombination.builder().tipsters(tipstersCombination).winDays(winDays).build());
-        })
-        .filter(pair -> pair.getLeft() > 1)
-        .collect(groupingBy(Pair::getLeft, Collectors.mapping(Pair::getRight, Collectors.toList())));
+                    }
+                    return Pair.of(noOfSuccesses, TipstersCombination.builder().tipsters(tipstersCombination).winDays(winDays).build());
+                })
+                .filter(pair -> pair.getLeft() > 1)
+                .collect(groupingBy(Pair::getLeft, Collectors.mapping(Pair::getRight, Collectors.toList())));
+
+        logger.info("Computation DONE!");
 
         LinkedHashMap<Integer, List<TipstersCombination>> resultsSorted = results.entrySet().stream()
-                                                        .sorted(Map.Entry.comparingByKey(Comparator.reverseOrder()))
-                                                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                                                                (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+                .sorted(Map.Entry.comparingByKey(Comparator.reverseOrder()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
-        logger.info("DONE!");
+        logger.info("Sorting DONE!");
 
-        resultsSorted.entrySet().stream().forEach( r -> {
-            logger.info("Results: {} wins/month -> {} combinations ", r.getKey(), r.getValue().size());
-            }
-        );
-
-        Integer lastKey = resultsSorted.keySet().stream().reduce((first, second) -> second)
-                .orElse(null);
-
-
+//        resultsSorted.entrySet().stream().forEach(r -> {
+//                    logger.info("Results: {} wins/month -> {} combinations ", r.getKey(), r.getValue().size());
+//                }
+//        );
 
         if (resultsSorted.entrySet().size() > 2) {
-            logger.info("Remove combinations for {} wins/month. They are too many", lastKey);
-            resultsSorted.remove(lastKey);
-            resultsSorted.entrySet().stream().forEach( r -> {
-                        logger.info("FINAL RESULTS: {} wins/month -> {} combinations ", r.getKey(), r.getValue().size());
-                    }
-            );
+            Iterator<Map.Entry<Integer, List<TipstersCombination>>> iterator = resultsSorted.entrySet().iterator();
+            Map.Entry<Integer, List<TipstersCombination>> firstSetOfWinningCombinations = iterator.next();
+            Map.Entry<Integer, List<TipstersCombination>> secondSetOfWinningCombinations = iterator.next();
+           //logger.info("Keep only combinations for {} and {} wins/month", firstSetOfWinningCombinations.getKey(), secondSetOfWinningCombinations.getKey());
+            resultsSorted = new LinkedHashMap<>();
+            resultsSorted.put(firstSetOfWinningCombinations.getKey(), firstSetOfWinningCombinations.getValue());
+            resultsSorted.put(secondSetOfWinningCombinations.getKey(), secondSetOfWinningCombinations.getValue());
         }
 
+        logger.info("Filtering DONE!");
 
-        int noOfFoundCombinations =  resultsSorted.values().stream().mapToInt(list -> list.size()).sum();
+        int noOfFoundCombinations = resultsSorted.values().stream().mapToInt(list -> list.size()).sum();
 
-        redirectAttributes.addFlashAttribute("noOfFoundCombinations" , noOfFoundCombinations);
-        redirectAttributes.addFlashAttribute("resultsSorted" , resultsSorted);
+        redirectAttributes.addFlashAttribute("noOfFoundCombinations", noOfFoundCombinations);
+        redirectAttributes.addFlashAttribute("resultsSorted", resultsSorted);
+        redirectAttributes.addFlashAttribute("days", getDaysArray(NO_OF_DAYS_ANALYZED));
         return "redirect:/";
     }
 
-    private List<Tipster> getTipstersFromFile(MultipartFile file, String sortType) throws IOException {
+    private List<Tipster> getTipstersFromFile(MultipartFile file, String sortType, Integer NO_OF_DAYS_ANALYZED) throws IOException {
         List<Tipster> tipstersList = new ArrayList<Tipster>();
         XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
         XSSFSheet worksheet = workbook.getSheetAt(0);
@@ -130,12 +130,12 @@ public class FileUploadController {
 
             XSSFRow row = worksheet.getRow(rowNum);
 
-            if(row == null)
+            if (row == null)
                 continue;
 
             XSSFCell tipsterNameCell = row.getCell(0);
 
-            if(tipsterNameCell == null || tipsterNameCell.getCellType() != CellType.STRING)
+            if (tipsterNameCell == null || tipsterNameCell.getCellType() != CellType.STRING)
                 continue;
 
             String tipsterName = tipsterNameCell.getStringCellValue();
@@ -145,16 +145,16 @@ public class FileUploadController {
                     .results(new HashMap())
                     .build();
             int winsPerMonth = 0;
-            for (int day = 1; day <= 31; day++) {
+            for (int day = 1; day <= NO_OF_DAYS_ANALYZED; day++) {
 
                 int intResultOfDay = 0;
                 String resultOfDay = "0";
-                if(row.getCell(day) !=null && row.getCell(day).getCellType()== CellType.NUMERIC) {
-                    intResultOfDay = (int)row.getCell(day).getNumericCellValue();
+                if (row.getCell(day) != null && row.getCell(day).getCellType() == CellType.NUMERIC) {
+                    intResultOfDay = (int) row.getCell(day).getNumericCellValue();
                     resultOfDay = String.valueOf(intResultOfDay);
                 }
 
-                if(row.getCell(day) !=null && row.getCell(day).getCellType()== CellType.STRING && row.getCell(day).getStringCellValue().equals("N")) {
+                if (row.getCell(day) != null && row.getCell(day).getCellType() == CellType.STRING && row.getCell(day).getStringCellValue().equals("N")) {
                     //if tip is missing for the day I want to count ZERO
                     intResultOfDay = 0;
                     resultOfDay = "N";
@@ -165,7 +165,7 @@ public class FileUploadController {
                 winsPerMonth += intResultOfDay;
             }
             tipster.setWinsPerMonth(winsPerMonth);
-            tipster.setPreviousWins((int)row.getCell(33).getNumericCellValue());
+            tipster.setPreviousWins((int) row.getCell(NO_OF_DAYS_ANALYZED + 2).getNumericCellValue());
             tipster.setTotalWins(tipster.getWinsPerMonth() + tipster.getPreviousWins());
             tipstersList.add(tipster);
         }
@@ -173,16 +173,25 @@ public class FileUploadController {
         logger.info("Tipsters found: {} and sort type: {}", tipstersList.size(), sortType);
 
         Comparator comparator = "month".equals(sortType) ?
-                                        Comparator.comparing(Tipster::getWinsPerMonth).reversed()
-                                      : Comparator.comparing(Tipster::getTotalWins).reversed();
+                Comparator.comparing(Tipster::getWinsPerMonth).reversed()
+                : Comparator.comparing(Tipster::getTotalWins).reversed();
         tipstersList.sort(comparator);
 
-        if(tipstersList.size() > 23) {
+        if (tipstersList.size() > 23) {
             tipstersList = tipstersList.subList(0, 23);
             logger.info("Keep only the first 23 tipsters");
         }
-
+        logger.info("File reading DONE!");
         return tipstersList;
+    }
+
+
+    private List<Integer> getDaysArray(Integer noOfDays) {
+        List<Integer> days = new ArrayList<>();
+        for (int i = 1; i <= noOfDays; i++) {
+            days.add(i);
+        }
+        return days;
     }
 }
 
