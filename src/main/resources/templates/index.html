@@ -21,12 +21,14 @@
             </div>
             <div class="col-sm-2" >
                 <label class="form-control-sm">Days:</label>
-                <input type="radio" name="noOfDaysAnalyzed" id="noOfDays31" value="31" checked/>
+                <input type="radio" name="noOfDaysAnalyzed" id="noOfDays31" value="31" />
                 <label class="form-control-sm form-check-label" for="noOfDays31">31</label>
                 <input  type="radio" name="noOfDaysAnalyzed" id="noOfDaysAnalyzed62" value="62" />
                 <label class="form-control-sm form-check-label" for="noOfDaysAnalyzed62">62</label>
-                <input  type="radio" name="noOfDaysAnalyzed" id="noOfDaysAnalyzed93" value="93" />
+                <input  type="radio" name="noOfDaysAnalyzed" id="noOfDaysAnalyzed93" value="93" checked/>
                 <label class="form-control-sm form-check-label" for="noOfDaysAnalyzed93">93</label>
+                <input  type="radio" name="noOfDaysAnalyzed" id="noOfDaysAnalyzed186" value="186" checked/>
+                <label class="form-control-sm form-check-label" for="noOfDaysAnalyzed186">186</label>
             </div>
         </div>
         <div class="form-group row">
@@ -63,7 +65,7 @@
                     <th:block th:each="day : ${days}">
                         <th th:text="${day}"></th>
                     </th:block>
-                    <th> Wins/month</th>
+                    <th th:text="'Wins/'+${days.size()}"> </th>
                     <th> Previous Wins</th>
                     <th> Total Wins</th>
                 </tr>

@@ -43,6 +43,7 @@ public class FileUploadController {
                                    RedirectAttributes redirectAttributes) throws IOException {
 
 //        redirectAttributes.addFlashAttribute("message", "You successfully uploaded " + file.getOriginalFilename() + "!");
+        logger.info("============================ START MAGIC SHIT ============================");
         List<Tipster> tipstersList = getTipstersFromFile(file, sortType, NO_OF_DAYS_ANALYZED);
         redirectAttributes.addFlashAttribute("tipsters", tipstersList);
 
@@ -94,30 +95,31 @@ public class FileUploadController {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
-        logger.info("Sorting DONE!");
+        logger.info("Sorting results DONE!");
 
-//        resultsSorted.entrySet().stream().forEach(r -> {
-//                    logger.info("Results: {} wins/month -> {} combinations ", r.getKey(), r.getValue().size());
-//                }
-//        );
+        resultsSorted.entrySet().stream().forEach(r -> {
+                    logger.info("Results: {} wins/month -> {} combinations ", r.getKey(), r.getValue().size());
+                }
+        );
 
         if (resultsSorted.entrySet().size() > 2) {
             Iterator<Map.Entry<Integer, List<TipstersCombination>>> iterator = resultsSorted.entrySet().iterator();
             Map.Entry<Integer, List<TipstersCombination>> firstSetOfWinningCombinations = iterator.next();
             Map.Entry<Integer, List<TipstersCombination>> secondSetOfWinningCombinations = iterator.next();
-           //logger.info("Keep only combinations for {} and {} wins/month", firstSetOfWinningCombinations.getKey(), secondSetOfWinningCombinations.getKey());
+           logger.info("Keep only combinations for {} wins/month and {} wins/month", firstSetOfWinningCombinations.getKey(), secondSetOfWinningCombinations.getKey());
             resultsSorted = new LinkedHashMap<>();
             resultsSorted.put(firstSetOfWinningCombinations.getKey(), firstSetOfWinningCombinations.getValue());
             resultsSorted.put(secondSetOfWinningCombinations.getKey(), secondSetOfWinningCombinations.getValue());
         }
 
-        logger.info("Filtering DONE!");
+        logger.info("Filtering results DONE!");
 
         int noOfFoundCombinations = resultsSorted.values().stream().mapToInt(list -> list.size()).sum();
 
         redirectAttributes.addFlashAttribute("noOfFoundCombinations", noOfFoundCombinations);
         redirectAttributes.addFlashAttribute("resultsSorted", resultsSorted);
         redirectAttributes.addFlashAttribute("days", getDaysArray(NO_OF_DAYS_ANALYZED));
+        logger.info("============================ MAGIC SHIT IS READY ============================");
         return "redirect:/";
     }
 
@@ -169,6 +171,7 @@ public class FileUploadController {
             tipster.setTotalWins(tipster.getWinsPerMonth() + tipster.getPreviousWins());
             tipstersList.add(tipster);
         }
+        logger.info("File reading DONE!");
 
         logger.info("Tipsters found: {} and sort type: {}", tipstersList.size(), sortType);
 
@@ -177,11 +180,10 @@ public class FileUploadController {
                 : Comparator.comparing(Tipster::getTotalWins).reversed();
         tipstersList.sort(comparator);
 
-        if (tipstersList.size() > 23) {
-            tipstersList = tipstersList.subList(0, 23);
-            logger.info("Keep only the first 23 tipsters");
+        if (tipstersList.size() > 25) {
+            tipstersList = tipstersList.subList(0, 25);
+            logger.info("Keep only the first 25 tipsters");
         }
-        logger.info("File reading DONE!");
         return tipstersList;
     }
 
